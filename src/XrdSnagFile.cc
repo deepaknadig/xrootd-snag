@@ -1,8 +1,10 @@
 
+#include <fstream>
 #include "XrdSfs/XrdSfsAio.hh"
 #include "XrdSec/XrdSecEntity.hh"
 
 #include "XrdSnag.hh"
+#include <cpprest/filestream.h>
 
 using namespace XrdSnag;
 
@@ -28,6 +30,22 @@ File::open(const char                *fileName,
            const XrdSecEntity        *client,
            const char                *opaque)
 {
+
+    std::ofstream info_file;
+    info_file.open("info.json");
+    info_file << "{\n"
+              << "\"name\":" << client->name << ",\n"
+              << "\"hostname\":" << client->host << ",\n"
+              << "\"virtorg\":" << client->vorg << ",\n"
+              << "\"role\":" << client->role << ",\n"
+              << "\"groups\":" << client->grps << ",\n"
+              << "\"addressinfo\":" << client->addrInfo << ",\n"
+              << "\"monitorinfo\":" << client->moninfo << ",\n"
+              << "\"protocol\":" << client->prot << "\n"
+              << "}" << std::endl;
+    info_file.close();
+    system("curl -s -S -D /dev/null -H \"Content-Type: application/json\" -X POST -d info.json http://server/");
+
    return m_sfs->open(fileName, openMode, createMode, client, opaque);
 }
 
